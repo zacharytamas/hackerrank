@@ -1,3 +1,6 @@
+# 2015-10-28
+# Solved in 00:17:55
+
 
 def formula(A, B):
   """Returns the next term in the series given two previous values.
