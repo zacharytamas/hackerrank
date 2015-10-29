@@ -32,9 +32,10 @@ def allocateEdges(graph, edges):
   """
   for a, b in edges:
     graph[a].append(b)
+    graph[b].append(a)
 
 
-def generateNextFrontier(nodes, current_depth, distances):
+def generateNextFrontier(nodes, current_depth, visited):
   """
   >>> generateNextFrontier([0, 1], 1, [-1, -1])
   [(0, 2), (1, 2)]
@@ -45,8 +46,11 @@ def generateNextFrontier(nodes, current_depth, distances):
   >>> generateNextFrontier([0, 1], 1, [-1, 6])
   [(0, 2)]
   """
-  return [(i, current_depth + 1)
-          for i in nodes if distances[i] == -1]
+  for i in nodes:
+    if not visited.get(i):
+      yield (i, current_depth + 1)
+    else:
+      print "_t_generateNextFrontier", "skipping", i
 
 
 def markShortestDistance(distances, node_index, depth):
@@ -88,15 +92,28 @@ def explore(graph, S):
   # We'll discover them soon.
   distances = initArray(len(graph), -1)
   distances[S] = 0  # The node has a distance of 0 from itself.
+  visited = {}
 
   # Initialize the frontier with nodes that are reachable from
   # the beginning node S.
-  frontier = generateNextFrontier(graph[S], 0, distances)
+  frontier = list(generateNextFrontier(graph[S], 0, visited))
+
+  print "_t_", frontier
+
+  _t_frontier_count = 1
 
   while len(frontier):
-    node, depth = frontier.pop()
+    node, depth = frontier.pop(0)
+    if visited.get(node):
+      # print "_t_", "already visited", node, "skipping"
+      continue
+    visited[node] = True
+    print node
+    # if distances[node] != -1:
+    #   continue
     markShortestDistance(distances, node, depth)
-    frontier.extend(generateNextFrontier(graph[node], depth, distances))
+    frontier.extend(generateNextFrontier(graph[node], depth, visited))
+    _t_frontier_count += 1
 
   return distances
 
@@ -127,7 +144,7 @@ def main():
     edges = []
     for m in range(M):
       x, y = map(int, raw_input().split())
-      edges.append((x-1, y-1))
+      edges.append((x - 1, y - 1))
     S = int(raw_input()) - 1
     result = solve(N, edges, S)
     for d in result:
@@ -137,5 +154,5 @@ def main():
 
 if __name__ == '__main__':
   import doctest
-  doctest.testmod()
+  # doctest.testmod()
   main()
